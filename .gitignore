@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+target/
+dist/
+
+# Build artifacts
+*.so
+*.dylib
+*.dll
+*.exe
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Solana
+.anchor/
+.env
+.env.local
+
+# Node
+npm-debug.log
+yarn-error.log
+
+# Anchor
+idl/
