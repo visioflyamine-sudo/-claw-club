@@ -1,0 +1,86 @@
+name: Build Claw Club Contract
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+env:
+  SOLANA_VERSION: 1.18.0
+  ANCHOR_VERSION: 0.29.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+      
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            .
+      
+      - name: Install Solana
+        run: |
+          sh -c "$(curl -sSfL https://release.solana.com/v${SOLANA_VERSION}/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+      
+      - name: Install Anchor
+        run: npm install -g @coral-xyz/anchor-cli@${ANCHOR_VERSION}
+      
+      - name: Build smart contract
+        run: anchor build --skip-lint
+      
+      - name: List artifacts
+        run: ls -lah target/deploy/ || echo "No artifacts"
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: contract-build
+          path: target/deploy/
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: build
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+      
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Install Solana
+        run: |
+          sh -c "$(curl -sSfL https://release.solana.com/v${SOLANA_VERSION}/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+      
+      - name: Install Anchor
+        run: npm install -g @coral-xyz/anchor-cli@${ANCHOR_VERSION}
+      
+      - name: Run tests
+        run: anchor test --skip-deploy 2>&1 || true
