@@ -1,0 +1,108 @@
+name: Devnet Deploy & Test
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.solana.com/v1.18.0/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+
+      - name: Install Anchor CLI
+        run: |
+          npm install -g @coral-xyz/anchor-cli
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Configure Solana CLI for Devnet
+        run: |
+          solana config set --url https://api.devnet.solana.com
+          solana address
+
+      - name: Get Devnet SOL airdrop
+        run: |
+          solana airdrop 5 || true
+
+      - name: Build contract
+        working-directory: ./contracts
+        run: |
+          anchor build --skip-lint
+
+      - name: Get Program ID
+        working-directory: ./contracts
+        run: |
+          PROGRAM_ID=$(grep 'declare_id!' src/lib.rs | grep -o '"[^"]*"' | tr -d '"')
+          echo "PROGRAM_ID=$PROGRAM_ID" >> $GITHUB_ENV
+          echo "Program ID: $PROGRAM_ID"
+
+      - name: Deploy to Devnet
+        working-directory: ./contracts
+        run: |
+          anchor deploy --provider.cluster devnet
+
+      - name: Run tests
+        working-directory: ./contracts
+        run: |
+          anchor test --provider.cluster devnet
+
+      - name: Save deployment info
+        run: |
+          mkdir -p deployment-reports
+          echo "Deployment Report - $(date)" > deployment-reports/devnet-report.txt
+          echo "Program ID: $PROGRAM_ID" >> deployment-reports/devnet-report.txt
+          echo "Network: Devnet" >> deployment-reports/devnet-report.txt
+          echo "Status: ✅ SUCCESS" >> deployment-reports/devnet-report.txt
+          cat deployment-reports/devnet-report.txt
+
+      - name: Upload deployment artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: deployment-reports
+          path: deployment-reports/
+
+      - name: Comment on commit
+        uses: actions/github-script@v6
+        if: always()
+        with:
+          script: |
+            const fs = require('fs');
+            let message = '';
+            
+            if (job.status === 'success') {
+              message = `✅ **Devnet Deployment Successful!**
+              
+Program ID: ${{ env.PROGRAM_ID }}
+Network: Solana Devnet
+All tests: ✅ PASSED
+
+🔗 View on Solscan: https://devnet.solscan.io/address/${{ env.PROGRAM_ID }}
+`;
+            } else {
+              message = `❌ **Devnet Deployment Failed**
+              
+Check the logs above for details.`;
+            }
+            
+            console.log(message);
