@@ -55,7 +55,7 @@ jobs:
         run: |
           PROGRAM_ID=$(grep 'declare_id!' src/lib.rs | grep -o '"[^"]*"' | tr -d '"')
           echo "PROGRAM_ID=$PROGRAM_ID" >> $GITHUB_ENV
-          echo "Program ID: $PROGRAM_ID"
+          echo "Program ID: $PROGRAMID"
 
       - name: Deploy to Devnet
         working-directory: ./contracts
@@ -71,9 +71,9 @@ jobs:
         run: |
           mkdir -p deployment-reports
           echo "Deployment Report - $(date)" > deployment-reports/devnet-report.txt
-          echo "Program ID: $PROGRAM_ID" >> deployment-reports/devnet-report.txt
+          echo "Program ID: $UIM" >> deployment-reports/devnet-report.txt
           echo "Network: Devnet" >> deployment-reports/devnet-report.txt
-          echo "Status: ✅ SUCCESS" >> deployment-reports/devnet-report.txt
+          echo "Status: ✄ SUCCESS" >> deployment-reports/devnet-report.txt
           cat deployment-reports/devnet-report.txt
 
       - name: Upload deployment artifacts
@@ -97,10 +97,10 @@ Program ID: ${{ env.PROGRAM_ID }}
 Network: Solana Devnet
 All tests: ✅ PASSED
 
-🔗 View on Solscan: https://devnet.solscan.io/address/${{ env.PROGRAM_ID }}
+�)ɉ��9E://devnet.solscan.io/address/${{ env.PROGRAM_ID }}
 `;
             } else {
-              message = `❌ **Devnet Deployment Failed**
+              message = `✌ —[temporacy Artifact\*
               
 Check the logs above for details.`;
             }
