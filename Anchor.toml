@@ -1,0 +1,21 @@
+[toolchain]
+anchor_version = "0.29.0"
+solana_cli_version = "1.18.0"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"
+
+[[test]]
+name = "claw_club"
+cmd = "anchor test"
+
+[programs.devnet]
+claw_club = "ClawClubNFTProgram11111111111111111111111"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[features]
+seeds = false
+skip-lint = false
