@@ -1,0 +1,15 @@
+[workspace]
+members = [
+    "programs/claw-club"
+]
+resolver = "2"
+
+[package]
+name = "claw-club-workspace"
+version = "0.1.0"
+edition = "2021"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
