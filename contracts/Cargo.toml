@@ -1,0 +1,18 @@
+[package]
+name = "claw_club"
+version = "0.1.0"
+description = "Claw Club NFT Collection - Free Mint with Whitelist"
+edition = "2021"
+
+[dependencies]
+anchor-lang = "0.28.0"
+anchor-spl = "0.28.0"
+solana-program = "1.18"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
