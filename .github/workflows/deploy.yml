@@ -1,31 +1,16 @@
 name: Deploy
-
 on:
   push:
-    branches: [main]
-
+    branches:
+      - main
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
-      - name: Test Build
-        run: echo "Building Claw Club Smart Contract..."
-      
-      - name: Install Rust
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-          source $HOME/.cargo/env
-          rustc --version
-      
-      - name: Build Contract
-        run: |
-          mkdir -p build
-          echo "Build completed" > build/status.txt
-      
-      - name: Upload Report
-        uses: actions/upload-artifact@v3
+      - run: echo "Hello Claw Club"
+      - run: mkdir -p output && echo "OK" > output/status.txt
+      - uses: actions/upload-artifact@v3
         with:
-          name: build-report
-          path: build/
+          name: output
+          path: output/
